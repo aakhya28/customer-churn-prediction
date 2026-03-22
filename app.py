@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import joblib
+import pickle
 import os
 from PIL import Image
 
@@ -38,10 +38,11 @@ st.markdown("""
 @st.cache_resource
 def load_model():
     try:
-        pipeline = joblib.load('models/churn_model.pkl')
-        return pipeline
+        with open('models/churn_model.pkl', 'rb') as f:
+            pipeline = pickle.load(f)
+            return pipeline
     except FileNotFoundError:
-        st.error("❌ Model files not found! Please run 'python train.py' first.")
+        st.error(" Model files not found! Please run 'python train.py' first.")
         st.stop()
 
 pipeline = load_model()
@@ -191,7 +192,7 @@ if page == "🎯 Make Prediction":
                 """)
                 
         except Exception as e:
-            st.error(f"❌ Error: {str(e)}")
+            st.error(f" Error: {str(e)}")
             st.info("Ensure all features match the training data format.")
 
 # ============ PAGE 2: MODEL PERFORMANCE ============
