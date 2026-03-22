@@ -45,13 +45,13 @@ preprocessor = ColumnTransformer([
 print("\n Training models...")
 X_train,X_test,y_train,y_test=train_test_split(X,y,random_state=42,test_size=0.2)
 models = {
-    'Logistic Regression': make_pipeline(
+    'Logistic Regression':make_pipeline(
         preprocessor,
-        LogisticRegression(max_iter=1000, random_state=42)
+        LogisticRegression(max_iter=500,random_state=42)
     ),
-    'Random Forest': make_pipeline(
+    'Random Forest':make_pipeline(
         preprocessor,
-        RandomForestClassifier(n_estimators=500, random_state=42)
+        RandomForestClassifier(n_estimators=500,random_state=42)
     ),
     'SVM': make_pipeline(
         preprocessor,
