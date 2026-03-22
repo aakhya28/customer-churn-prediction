@@ -9,7 +9,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
-import joblib
+import pickle
 from sklearn.svm import SVC
 
 print("\n Loading data...")
@@ -97,8 +97,10 @@ print("-" * 70)
 results_df = pd.DataFrame(results).T
 print(results_df.round(4))
 
-joblib.dump(best_pipeline, 'models/churn_model.pkl')
-joblib.dump(preprocessor, 'models/preprocessor.pkl')
+with open('models/churn_model.pkl', 'wb') as f:
+    pickle.dump(best_pipeline, f)
+with open('models/preprocessor.pkl', 'wb') as f:
+    pickle.dump(preprocessor, f)
 print(f"\n Model saved to 'models/churn_model.pkl'")
 print(f" Preprocessor saved to 'models/preprocessor.pkl'")
  
