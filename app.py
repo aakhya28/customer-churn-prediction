@@ -3,15 +3,38 @@ import pandas as pd
 import numpy as np
 import pickle
 import os
+import subprocess
 from PIL import Image
 
-# Page Configuration
 st.set_page_config(
     page_title="Customer Churn Predictor",
     page_icon="🔮",
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# ============ AUTO-TRAIN MODEL IF NEEDED ============
+@st.cache_resource
+def get_pipeline():
+    model_path = 'models/churn_model.pkl'
+    
+    # If model doesn't exist, train it
+    if not os.path.exists(model_path):
+        st.info("🔄 Training model on first load... This takes about 1-2 minutes.")
+        try:
+            subprocess.run(['python', 'train.py'], check=True, capture_output=True)
+            st.success("✅ Model trained successfully!")
+        except Exception as e:
+            st.error(f"Error training model: {e}")
+            st.stop()
+    
+    # Load the trained model
+    with open(model_path, 'rb') as f:
+        pipeline = pickle.load(f)
+    
+    return pipeline
+
+pipeline = get_pipeline()
 
 # Custom CSS
 st.markdown("""
@@ -33,19 +56,6 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
-
-# ============ LOAD MODEL ============
-@st.cache_resource
-def load_model():
-    try:
-        with open('models/churn_model.pkl', 'rb') as f:
-            pipeline = pickle.load(f)
-            return pipeline
-    except FileNotFoundError:
-        st.error(" Model files not found! Please run 'python train.py' first.")
-        st.stop()
-
-pipeline = load_model()
 
 # ============ SIDEBAR NAVIGATION ============
 st.sidebar.title("🔮 Churn Predictor")
@@ -106,7 +116,6 @@ if page == "🎯 Make Prediction":
     # Make prediction
     if st.button("🚀 Predict Churn", key="predict_btn"):
         try:
-            # Create dataframe with EXACT columns from dataset (excluding customerID and Churn)
             input_data = pd.DataFrame({
                 'gender': [gender],
                 'SeniorCitizen': [1 if senior_citizen == "Yes" else 0],
@@ -129,7 +138,6 @@ if page == "🎯 Make Prediction":
                 'TotalCharges': [total_charges],
             })
             
-            # Predict
             prediction = pipeline.predict(input_data)[0]
             probability = pipeline.predict_proba(input_data)[0]
             
@@ -175,25 +183,20 @@ if page == "🎯 Make Prediction":
             st.subheader("💡 Recommendations")
             if prediction == 1:
                 st.warning("""
-                **Customer at Risk - Action Required!**
-                
-                - 📞 Proactive outreach and engagement
-                - 💰 Retention discounts or offers
-                - 🎁 Service upgrades at reduced rates
-                - 📧 Personalized campaigns
+                **Customer at Risk!**
+                - 📞 Proactive outreach
+                - 💰 Retention discounts
+                - 🎁 Service upgrades
                 """)
             else:
                 st.success("""
-                **Customer Satisfied - Growth Opportunity!**
-                
-                - ⭐ Upsell premium services
-                - 🎁 Loyalty rewards program
-                - 📊 Regular satisfaction checks
+                **Customer Satisfied!**
+                - ⭐ Upsell opportunities
+                - 🎁 Loyalty programs
                 """)
                 
         except Exception as e:
-            st.error(f" Error: {str(e)}")
-            st.info("Ensure all features match the training data format.")
+            st.error(f"❌ Error: {str(e)}")
 
 # ============ PAGE 2: MODEL PERFORMANCE ============
 elif page == "📊 Model Performance":
@@ -216,12 +219,9 @@ elif page == "📊 Model Performance":
         st.subheader("Confusion Matrix")
         if os.path.exists('models/confusion_matrix.png'):
             st.image(Image.open('models/confusion_matrix.png'))
-        else:
-            st.info("Run 'python train.py' first")
     
     with col2:
         st.subheader("ROC Curve")
         if os.path.exists('models/roc_curve.png'):
             st.image(Image.open('models/roc_curve.png'))
-        else:
-            st.info("Run 'python train.py' first")
+
