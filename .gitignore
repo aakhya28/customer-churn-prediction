@@ -138,9 +138,7 @@ out/
 .DS_Store
 
 # Custom
-*.pkl
 *.csv
 data/
-models/
 .env
 .env.local
