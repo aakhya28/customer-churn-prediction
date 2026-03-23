@@ -2,7 +2,7 @@
 
 A machine learning project to predict customer churn using classification algorithms. Built with Scikit-learn and deployed with Streamlit for interactive predictions.
 
-##  Project Overview
+##  Project Overview   
 
 This project demonstrates:
 - **Data preprocessing** & feature scaling (StandardScaler)
